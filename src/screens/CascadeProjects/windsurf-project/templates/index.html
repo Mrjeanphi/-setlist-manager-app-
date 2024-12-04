@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        #setlist-form {
+            background: #f4f4f4;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #setlist-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .setlist-item {
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Setlist Manager</h1>
+    
+    <div id="setlist-form">
+        <h2>Create New Setlist</h2>
+        <input type="text" id="setlist-name" placeholder="Setlist Name">
+        <textarea id="setlist-songs" placeholder="Enter songs (one per line)"></textarea>
+        <button onclick="createSetlist()">Create Setlist</button>
+    </div>
+
+    <h2>Existing Setlists</h2>
+    <ul id="setlist-list"></ul>
+
+    <script>
+        // Fetch and display setlists
+        function loadSetlists() {
+            fetch('/setlists')
+                .then(response => response.json())
+                .then(setlists => {
+                    const setlistList = document.getElementById('setlist-list');
+                    setlistList.innerHTML = '';
+                    setlists.forEach(setlist => {
+                        const li = document.createElement('li');
+                        li.className = 'setlist-item';
+                        li.innerHTML = `
+                            <div>
+                                <strong>${setlist.name}</strong>
+                                <p>${setlist.songs ? setlist.songs.join(', ') : 'No songs'}</p>
+                            </div>
+                            <div>
+                                <button onclick="deleteSetlist(${setlist.id})">Delete</button>
+                            </div>
+                        `;
+                        setlistList.appendChild(li);
+                    });
+                });
+        }
+
+        // Create a new setlist
+        function createSetlist() {
+            const nameInput = document.getElementById('setlist-name');
+            const songsInput = document.getElementById('setlist-songs');
+            
+            const newSetlist = {
+                name: nameInput.value,
+                songs: songsInput.value.split('\n').filter(song => song.trim() !== '')
+            };
+
+            fetch('/setlists', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSetlist)
+            })
+            .then(response => response.json())
+            .then(() => {
+                // Clear inputs
+                nameInput.value = '';
+                songsInput.value = '';
+                // Reload setlists
+                loadSetlists();
+            });
+        }
+
+        // Delete a setlist
+        function deleteSetlist(id) {
+            fetch(`/setlists/${id}`, {
+                method: 'DELETE'
+            })
+            .then(() => loadSetlists());
+        }
+
+        // Load setlists when page loads
+        loadSetlists();
+    </script>
+</body>
+</html>

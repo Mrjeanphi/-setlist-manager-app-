@@ -1,8 +1,14 @@
 [build]
   publish = "."
+  command = ""
 
 [build.processing]
   skip_processing = true
+
+[build.environment]
+  NODE_VERSION = "none"
+  NETLIFY_USE_NEXTJS = "false"
+  CI = "false"
 
 [[headers]]
   for = "/*"

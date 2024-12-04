@@ -1,5 +1,14 @@
 [build]
   publish = "."
+  command = ""
+  ignore = "false"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NETLIFY_USE_NEXTJS = "false"
+
+[build.processing]
+  skip_processing = true
 
 [dev]
   framework = "#static"
